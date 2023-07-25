@@ -1,0 +1,51 @@
+server:
+  port: 0
+  servlet:
+    context-path: /ms-auth #http://{nome_host}:{port}/{context-path}/...
+
+spring:
+  application:
+    name: ms-auth
+
+  # Configurazione di connessione al db
+  datasource:
+    url: jdbc:mysql://localhost:3306/ms-auth?createDatabaseIfNotExist=true&autoReconnect=true&useSLL=false
+    username: root
+    password: fabeer1995
+
+  # Configurazione JPA
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    open-in-view: false
+
+logging:
+  level:
+    it.cgmconsulting.ms-auth: info
+    org.hibernate.orm.jdbc.bind: trace
+    org.springframework: info
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+
+eureka:
+  client:
+    service-url:
+      default-zone: localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info,health
+  info:
+    java.enabled: true
+    os.enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+    zipkin:
+      tracing:
+        endpoint: http://localhost:9411/api/v2/spans
