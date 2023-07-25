@@ -1,0 +1,90 @@
+server:
+  port: 0
+  servlet:
+    context-path: /ms-post #http://{nome_host}:{port}/{context-path}/...
+
+spring:
+  application:
+    name: ms-post
+
+  # Configurazione di connessione al db
+  datasource:
+    url: jdbc:mysql://localhost:3306/ms-post?createDatabaseIfNotExist=true&autoReconnect=true&useSLL=false
+    username: root
+    password: fabeer1995
+
+  # Configurazione JPA
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    open-in-view: false
+
+logging:
+  level:
+    it.cgmconsulting.mspost: info
+    org.hibernate.orm.jdbc.bind: trace
+    org.springframework: info
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+
+eureka:
+  client:
+    service-url:
+      default-zone: localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info,health
+  info:
+    java.enabled: true
+    os.enabled: true
+  health:
+    circuit-breakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+    zipkin:
+      tracing:
+        endpoint: http://localhost:9411/api/v2/spans
+
+
+
+
+resilience4j.circuitbreaker:
+  instances:
+    a-tempo:
+      register-health-indicator: true
+      # Apertura del circuito se la request impiega più tempo di quanto stimato
+      sliding-window-type: TIME_BASED
+      # Numero di tentativi di request
+      sliding-window-size: 1
+      # Soglia - in percentuale - di fallimenti (se al 100%, basta che la chiamata al microservizio fallisca una volta sola)
+      slow-call-rate-threshold: 100
+      # Un'interazione è considerata lenta se impiega più di n secondi a rispondere
+      slow-call-duration-threshold: 2s
+      # Tempo per il quale permane lo stato HALF_OPEN
+      wait-duration-in-open-state: 60s
+      minimum-number-of-calls: 1
+      # Numero massimo di request permesse in stato HALF_OPEN
+      permitted-number-of-calls-in-half-open-state: 1
+      automatic-transition-from-open-to-half-open-enabled: true
+    a-tentativi:
+      register-health-indicator: true
+      # Apertura del circuito se la request fallisce n volte
+      sliding-window-type: COUNT_BASED
+      # Numero di tentativi di request
+      sliding-window-size: 1
+      # Soglia - in percentuale - di fallimenti (se al 100%, basta che la chiamata al microservizio fallisca una volta sola)
+      failure-rate-threshold: 100
+      wait-duration-in-open-state: 60s
+      permitted-number-of-calls-in-half-open-state: 1
+      automatic-transition-from-open-to-half-open-enabled: true
