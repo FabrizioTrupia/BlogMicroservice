@@ -1,0 +1,65 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: ms-auth
+          # lb = load balancer
+          uri: lb://ms-auth
+          predicates:
+            - Path=/ms-auth/**
+        - id: ms-post
+          # lb = load balancer
+          uri: lb://ms-post
+          predicates:
+            - Path=/ms-post/**
+        - id: ms-category
+          # lb = load balancer
+          uri: lb://ms-category
+          predicates:
+            - Path=/ms-category/**
+        - id: ms-rating
+          # lb = load balancer
+          uri: lb://ms-rating
+          predicates:
+            - Path=/ms-rating/**
+        - id: ms-comment
+          # lb = load balancer
+          uri: lb://ms-comment
+          predicates:
+            - Path=/ms-comment/**
+
+
+eureka:
+  client:
+    service-url:
+      default-zone: localhost:8761/eureka
+
+logging:
+  level:
+    org.springframework.cloud.gateway: info
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info,health
+  info:
+    java.enabled: true
+    os.enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+
+
